@@ -29,11 +29,11 @@ app.geometry("1000x440") #this can change at any time. // Elder, J. (2023, Septe
 app.title('H.A.D.E.S - Highly advanced data encryption system') # just for the name of the app // Elder, J. (2023, September 19).
 #create Hades background logo
 #YouTube. (2023, August 11).
-Hades_path = os.path.join(os.path.dirname(__file__), 'C:/Users/Hardm/OneDrive/Desktop/Senior Project ITS-465/Code/Final/Hades.png') #receving png location
+Hades_path = os.path.join(os.path.dirname(__file__), 'C:/ Change to the desired logo location') #receving png location
 image = customtkinter.CTkImage(light_image = Image.open(Hades_path), size=(400, 200)) #image sizing
 Hades_label = customtkinter.CTkLabel(app, image = image, text= '' ) 
 Hades_label.place(relx=0.475, rely=0.37, anchor='center')#centring image 
-app.iconbitmap("C:/Users/Hardm/OneDrive/Desktop/Senior Project ITS-465/Code/Final/Bderko.ico") #app Icon
+app.iconbitmap("C:Change to the desired Icong location") #app Icon
 
 #############################################################################################################
 #pop Up information message to help users.
@@ -104,7 +104,7 @@ def decrypt_file(file_path, key): #Yasser, A. (2024).
         return False, f"Decryption failed: {str(e)}" #Programiz. (n.d.).
     
     # Create a new file path for the decrypted file
-    # This will add '_decrypted' before the file extension of the original file
+    # This will add '_decrypted' before the file extension of the original file instead of .replace which will delete the original file
     decrypted_file_path = file_path.rsplit('.encrypted', 1)[0] + '_decrypted'
     if '.encrypted' in file_path:
         decrypted_file_path += file_path.rsplit('.encrypted', 1)[1]
