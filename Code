@@ -1,0 +1,164 @@
+import tkinter as tk #importing tkinter library for GUI purposes // Elder, J. (2023, September 19).
+from tkinter import simpledialog  #Python documentation. (n.d.)
+from tkinter import filedialog #importing Filedialog for to be able to access or select files on the machine // #Python documentation. (n.d.)
+from cryptography.fernet import Fernet # importing fernet due too its strong encryption for symmetric keys // PyPI. (n.d.).
+import customtkinter   #importing New modern tkinter library // Elder, J. (2023, September 19).
+import PyPDF2 #dealing with PDF files // Thoma, M. (n.d.).
+import os #Python documentation. (n.d.-c).
+from docx import Document #dealing with docx files  #Docx, python.(n.d.).
+from PIL import Image #YouTube. (2023, August 11).
+import pyperclip  #AlSweigart. (n.d.)
+from tkinter import messagebox
+
+
+
+
+customtkinter.set_appearance_mode("light")  # Modes: system (default), light, dark // Elder, J. (2023, September 19).
+customtkinter.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green // Elder, J. (2023, September 19).
+
+
+# create CTk window like you do with the Tk window
+app = customtkinter.CTk()  #Elder, J. (2023, September 19).
+
+app.geometry("1000x440") #this can change at any time. // Elder, J. (2023, September 19).
+
+
+#####################################################################################################################################
+
+# this is for the app name
+app.title('H.A.D.E.S - Highly advanced data encryption system') # just for the name of the app // Elder, J. (2023, September 19).
+#create Hades background logo
+#YouTube. (2023, August 11).
+Hades_path = os.path.join(os.path.dirname(__file__), 'C:/ Change to the desired logo location') #receving png location
+image = customtkinter.CTkImage(light_image = Image.open(Hades_path), size=(400, 200)) #image sizing
+Hades_label = customtkinter.CTkLabel(app, image = image, text= '' ) 
+Hades_label.place(relx=0.475, rely=0.37, anchor='center')#centring image 
+app.iconbitmap("C:Change to the desired Icong location") #app Icon
+
+#############################################################################################################
+#pop Up information message to help users.
+
+
+
+#############################################################################################################
+def generate_key():
+    #Generate an AES 128-bit key.
+    return Fernet.generate_key() #PyPI. (n.d.). / Yasser, A. (2024).
+
+def encrypt_file(file_path, key):
+    #Encrypt the file using AES 128-bit key and save it as a new file with the same name + encrypted.
+    fernet = Fernet(key) #PyPI. (n.d.).
+    with open(file_path, 'rb') as file: #read binary. that would help encrypting the content later
+        original = file.read() #Yasser, A. (2024).
+    encrypted = fernet.encrypt(original) #PyPI. (n.d.).
+
+ # Create a new file path for the encrypted file
+    encrypted_file_path = f"{file_path}.encrypted" #Yasser, A. (2024).
+    
+    with open(encrypted_file_path, 'wb') as encrypted_file: #Write Binary. that encrypts the new file
+        encrypted_file.write(encrypted) #.write creates new file however .replace replaces the original file / #Yasser, A. (2024).
+    
+    return encrypted_file_path  # Return the path of the encrypted file  #Kumar, P. (2023, May 11).
+ 
+def button_function_enc():
+    file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf"), ("Word files", "*.docx")]) #open and select pdf, word files // #Python documentation. (n.d.) / Thoma, M. (n.d.).
+    if not file_path: #GfG. (2023, September 26).
+        return  # No file was selected #Kumar, P. (2023, May 11).
+
+    key = generate_key() #recalling key
+    encrypted_file_path = encrypt_file(file_path, key) #Yasser, A. (2024).
+    
+    # Display the key to the user
+    key_display = customtkinter.CTkLabel(master=app, text=f"Encryption Key: {key.decode()}\nEncrypted File: {encrypted_file_path} \nFile Encrypted Successfully. Keep the key safe for later decryption.\nYOUR FILE IS SAFE WITH ME :) ", wraplength=500) #Schimansky, T. (n.d.).
+    key_display.place(relx=0.5, rely=0.9, anchor=customtkinter.CENTER) #Schimansky, T. (n.d.).
+    
+    
+##############################################################################
+    #creating a button that copies the encryption key so the user doesn't have to type it manually.
+    def key_to_clipboard():
+        pyperclip.copy(key.decode())
+        print("key copied to clipboard.")
+    copy_key_button = customtkinter.CTkButton(master=app, text="Copy Encryption Key", command=key_to_clipboard, corner_radius=10, hover_color= "white", fg_color="black")
+    copy_key_button.place(relx=0.85, rely=0.9, anchor=customtkinter.CENTER) #Schimansky, T. (n.d.).
+    
+###########################################################
+    
+    print("File Encrypted Successfully. Keep the key safe for later decryption.")
+
+#encryption button visuals.
+button = customtkinter.CTkButton(master=app, text="Encryption", command=button_function_enc, height=50, corner_radius=100, width=200, fg_color="red", hover_color= "black", font=("Helvetica", 16))
+button.place(relx=0.35, rely=0.70, anchor=customtkinter.CENTER) #Schimansky, T. (n.d.). 
+
+###################################################################################################################
+
+####################################################################################################################################
+# Function to decrypt a file given its path and the decryption key
+def decrypt_file(file_path, key): #Yasser, A. (2024).
+    #Decrypt the file using User Input AES key.
+    fernet = Fernet(key)
+    with open(file_path, 'rb') as file: 
+        encrypted_data = file.read() #Yasser, A. (2024).
+    try:
+        decrypted_data = fernet.decrypt(encrypted_data)
+    except Exception as e:
+        return False, f"Decryption failed: {str(e)}" #Programiz. (n.d.).
+    
+    # Create a new file path for the decrypted file
+    # This will add '_decrypted' before the file extension of the original file instead of .replace which will delete the original file
+    decrypted_file_path = file_path.rsplit('.encrypted', 1)[0] + '_decrypted'
+    if '.encrypted' in file_path:
+        decrypted_file_path += file_path.rsplit('.encrypted', 1)[1]
+
+    with open(decrypted_file_path, 'wb') as dec_file:#Yasser, A. (2024).
+        dec_file.write(decrypted_data)
+    
+    return True, f"Decryption successful! Decrypted file saved as: {decrypted_file_path}"  #Kumar, P. (2023, May 11).
+
+# Function linked to the decryption button
+def button_function_dec():
+    file_path = filedialog.askopenfilename(filetypes=[("Encrypted files", "*.encrypted")]) #Python documentation. (n.d.)
+    if not file_path: #GfG. (2023, September 26).
+        print("No file selected")
+        return #Kumar, P. (2023, May 11).
+    key = simpledialog.askstring("Decryption Key", "Enter decryption key", parent=app) #Python documentation. (n.d.)
+    if key:   #GfG. (2023, September 26).
+        success, message = decrypt_file(file_path, key.encode())   
+        if success:
+            print(f"Decryption successful: {message}")
+        else:
+            print(message)
+    else:
+        print("No key provided")
+
+
+decryption_button = customtkinter.CTkButton(master=app, text="Decryption", command=button_function_dec, 
+height=50,hover_color= "black", corner_radius=100, width=200, font=("Helvetica",16)) #Schimansky, T. (n.d.).
+decryption_button.place(relx=0.6, rely=0.70, anchor=customtkinter.CENTER) #Schimansky, T. (n.d.). 
+
+########################################################################################################
+#
+app.mainloop() # Elder, J. (2023, September 19).
+
+
+#References
+#Amos, D. (2023, January 30). Python GUI programming with Tkinter. https://realpython.com/python-gui-tkinter/
+#AlSweigart. (n.d.). Pyperclip. PyPI. https://pypi.org/project/pyperclip/ 
+#Cryptographic documentation. (n.d.). Python services. https://docs.python.org/3/library/crypto.html
+#Cryptography 43.0.0.dev1 documentation. (n.d.). Fernet (symmetric encryption). https://cryptography.io/en/latest/fernet/
+#Docx, python. (n.d.). https://python-docx.readthedocs.io/en/latest/
+#Elder, J. (2023, September 19). Progress bars in customtkinter - tkinter customtkinter 6. YouTube. https://www.youtube.com/watch?v=HUdPRoGlNwc&list=PLfZw_tZWahjxJl81b1S-vYQwHs_9ZT77f&index=6&ab_channel=Tkinter%E2%80%A4com
+#Elder, J. (2024, January 16). Modern Tkinter design with customtkinter. YouTube. https://www.youtube.com/playlist?list=PLfZw_tZWahjxJl81b1S-vYQwHs_9ZT77f
+#Elder, J. (n.d.). Tkinter․Com. YouTube. https://www.youtube.com/@TkinterPython
+#GfG. (2022, June 3). Encrypt and decrypt files using Python. GeeksforGeeks. https://www.geeksforgeeks.org/encrypt-and-decrypt-files-using-python/
+#GfG. (2023, September 26). Python if with not operator. GeeksforGeeks. https://www.geeksforgeeks.org/python-if-with-not-operator/
+#GfG. (2023a, February 17). Build a basic form GUI using CustomTkinter module in Python. GeeksforGeeks. https://www.geeksforgeeks.org/build-a-basic-form-gui-using-customtkinter-module-in-python/
+#Kumar, P. (2023, May 11). Python return statement. AskPython. https://www.askpython.com/python/python-return-statement
+#Programiz. (n.d.).Python str().  https://www.programiz.com/python-programming/methods/built-in/str 
+#PyPI. (n.d.). Cryptography. https://pypi.org/project/cryptography/
+#Python documentation. (n.d.-c). OS - miscellaneous operating system interfaces. https://docs.python.org/3/library/os.html
+#Python documentation. (n.d.). Graphical user interfaces with TK. https://docs.python.org/3/library/tk.html
+#Python documentation. (n.d.). Tkinter dialogs. https://docs.python.org/3/library/dialog.html
+#Schimansky, T. (n.d.). GitHub. https://github.com/TomSchimansky/CustomTkinter/blob/master/Readme.md
+#Thoma, M. (n.d.). PYPDF2. PyPI. https://pypi.org/project/PyPDF2/
+#Yasser, A. (2024). Educative answers - trusted answers to developer questions. Educative. https://www.educative.io/answers/how-to-create-file-encryption-decryption-program-using-python
+#YouTube. (2023, August 11). How to add image in customtkinter app. YouTube. https://www.youtube.com/watch?v=V9RiDIrVmg0&ab_channel=FreePythonCode 
